@@ -37,6 +37,12 @@ lvim.builtin.which_key.mappings["<tab>"] = {
 }
 lvim.keys.normal_mode["<S-h>"] = false
 lvim.keys.normal_mode["<S-l>"] = false
+
+-- lvim.keys.normal_mode["<c-l>"] = false
+-- lvim.keys.normal_mode["<c-h>"] = false
+-- lvim.keys.normal_mode["<c-j>"] = false
+-- lvim.keys.normal_mode["<c-k>"] = false
+
 -- unmap a default keymapping
 -- lvim.keys.normal_mode["<C-Up>"] = false
 -- edit a default keymapping
@@ -52,6 +58,7 @@ lvim.builtin.telescope.defaults.mappings = {
     ["<C-k>"] = actions.move_selection_previous,
     ["<C-n>"] = actions.cycle_history_next,
     ["<C-p>"] = actions.cycle_history_prev,
+    ["<esc>"] = actions.close,
   },
   -- for normal mode
   n = {
@@ -61,15 +68,46 @@ lvim.builtin.telescope.defaults.mappings = {
 }
 
 -- Use which-key to add extra bindings with the leader-key prefix
-lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
 lvim.builtin.which_key.mappings["t"] = {
-  name = "+Trouble",
+  name = "+Trouble/Term",
+  t = { "<cmd>ToggleTerm<cr>", "Term" },
   r = { "<cmd>Trouble lsp_references<cr>", "References" },
   f = { "<cmd>Trouble lsp_definitions<cr>", "Definitions" },
   d = { "<cmd>Trouble document_diagnostics<cr>", "Diagnostics" },
   q = { "<cmd>Trouble quickfix<cr>", "QuickFix" },
   l = { "<cmd>Trouble loclist<cr>", "LocationList" },
   w = { "<cmd>Trouble workspace_diagnostics<cr>", "Wordspace Diagnostics" },
+}
+
+-- search
+lvim.builtin.which_key.mappings["ss"] = {
+  "<cmd>lua require('spectre').open()<CR>", "Search&Replace"
+}
+
+lvim.builtin.which_key.mappings["P"] = {
+  name = "Packer",
+  c = { "<cmd>PackerCompile<cr>", "Compile" },
+  i = { "<cmd>PackerInstall<cr>", "Install" },
+  r = { "<cmd>lua require('lv-utils').reload_lv_config()<cr>", "Reload" },
+  s = { "<cmd>PackerSync<cr>", "Sync" },
+  u = { "<cmd>PackerUpdate<cr>", "Update" },
+}
+lvim.builtin.which_key.mappings["p"] = { "<cmd>Telescope projects<CR>", "Projects" }
+
+lvim.builtin.which_key.mappings["q"] = {
+  name = "Session",
+  q = { "<cmd>q!<cr>", "Quit" },
+}
+
+lvim.builtin.which_key.mappings["c"] = {
+  name = "Conflict",
+  o = { "<cmd>GitConflictChooseOurs<cr>", "Our changes" },
+  t = { "<cmd>GitConflictChooseTheirs<cr>", "Their changes" },
+  b = { "<cmd>GitConflictChooseBoth<cr>", "Both changes" },
+  n = { "<cmd>GitConflictChooseNone<cr>", "Both none of the changes" },
+  j = { "<cmd>GitConflictNextConflict<cr>", "Next conflict" },
+  k = { "<cmd>GitConflictPrevConflict<cr>", "Previous conflict" },
+  l = { "<cmd>Telescope find_files  find_command=git,diff,--name-only,--diff-filter=U<cr>", "List conflicts" }
 }
 
 -- TODO: User Config for predefined plugins
@@ -99,6 +137,8 @@ lvim.builtin.treesitter.ensure_installed = {
 
 lvim.builtin.treesitter.ignore_install = { "haskell" }
 lvim.builtin.treesitter.highlight.enabled = true
+
+lvim.builtin.project.manual_mode = true
 
 -- generic LSP settings
 
@@ -197,6 +237,194 @@ lvim.plugins = {
     "tpope/vim-surround",
     keys = { "c", "d", "y" }
   },
+  {
+    "windwp/nvim-spectre",
+    event = "BufRead",
+    config = function()
+      require("spectre").setup({
+
+        color_devicons     = true,
+        open_cmd           = 'vnew',
+        live_update        = false, -- auto excute search again when you write any file in vim
+        line_sep_start     = '┌-----------------------------------------',
+        result_padding     = '¦  ',
+        line_sep           = '└-----------------------------------------',
+        highlight          = {
+          ui = "String",
+          search = "DiffChange",
+          replace = "DiffDelete"
+        },
+        mapping            = {
+          ['toggle_line'] = {
+            map = "dd",
+            cmd = "<cmd>lua require('spectre').toggle_line()<CR>",
+            desc = "toggle current item"
+          },
+          ['enter_file'] = {
+            map = "<cr>",
+            cmd = "<cmd>lua require('spectre.actions').select_entry()<CR>",
+            desc = "goto current file"
+          },
+          ['send_to_qf'] = {
+            map = "<leader>q",
+            cmd = "<cmd>lua require('spectre.actions').send_to_qf()<CR>",
+            desc = "send all item to quickfix"
+          },
+          ['replace_cmd'] = {
+            map = "<leader>c",
+            cmd = "<cmd>lua require('spectre.actions').replace_cmd()<CR>",
+            desc = "input replace vim command"
+          },
+          ['show_option_menu'] = {
+            map = "<leader>o",
+            cmd = "<cmd>lua require('spectre').show_options()<CR>",
+            desc = "show option"
+          },
+          ['run_replace'] = {
+            map = "<leader>R",
+            cmd = "<cmd>lua require('spectre.actions').run_replace()<CR>",
+            desc = "replace all"
+          },
+          ['change_view_mode'] = {
+            map = "<leader>v",
+            cmd = "<cmd>lua require('spectre').change_view()<CR>",
+            desc = "change result view mode"
+          },
+          ['toggle_live_update'] = {
+            map = "tu",
+            cmd = "<cmd>lua require('spectre').toggle_live_update()<CR>",
+            desc = "update change when vim write file."
+          },
+          ['toggle_ignore_case'] = {
+            map = "ti",
+            cmd = "<cmd>lua require('spectre').change_options('ignore-case')<CR>",
+            desc = "toggle ignore case"
+          },
+          ['toggle_ignore_hidden'] = {
+            map = "th",
+            cmd = "<cmd>lua require('spectre').change_options('hidden')<CR>",
+            desc = "toggle search hidden"
+          },
+          -- you can put your mapping here it only use normal mode
+        },
+        find_engine        = {
+          -- rg is map with finder_cmd
+          ['rg'] = {
+            cmd = "rg",
+            -- default args
+            args = {
+              '--color=never',
+              '--no-heading',
+              '--with-filename',
+              '--line-number',
+              '--column',
+            },
+            options = {
+              ['ignore-case'] = {
+                value = "--ignore-case",
+                icon = "[I]",
+                desc = "ignore case"
+              },
+              ['hidden'] = {
+                value = "--hidden",
+                desc = "hidden file",
+                icon = "[H]"
+              },
+              -- you can put any rg search option you want here it can toggle with
+              -- show_option function
+            }
+          },
+          ['ag'] = {
+            cmd = "ag",
+            args = {
+              '--vimgrep',
+              '-s'
+            },
+            options = {
+              ['ignore-case'] = {
+                value = "-i",
+                icon = "[I]",
+                desc = "ignore case"
+              },
+              ['hidden'] = {
+                value = "--hidden",
+                desc = "hidden file",
+                icon = "[H]"
+              },
+            },
+          },
+        },
+        replace_engine     = {
+          ['sed'] = {
+            cmd = "sed",
+            args = nil
+          },
+          options = {
+            ['ignore-case'] = {
+              value = "--ignore-case",
+              icon = "[I]",
+              desc = "ignore case"
+            },
+          }
+        },
+        default            = {
+          find = {
+            --pick one of item in find_engine
+            cmd = "rg",
+            options = { "ignore-case" }
+          },
+          replace = {
+            --pick one of item in replace_engine
+            cmd = "sed"
+          }
+        },
+        replace_vim_cmd    = "cdo",
+        is_open_target_win = true, --open file on opener window
+        is_insert_mode     = false -- start open panel on is_insert_mode
+      })
+    end,
+  },
+  {
+    "ethanholz/nvim-lastplace",
+    event = "BufRead",
+    config = function()
+      require("nvim-lastplace").setup({
+        lastplace_ignore_buftype = { "quickfix", "nofile", "help" },
+        lastplace_ignore_filetype = {
+          "gitcommit", "gitrebase", "svn", "hgcommit",
+        },
+        lastplace_open_folds = true,
+      })
+    end,
+  },
+  {
+    'akinsho/git-conflict.nvim',
+    config = function()
+      require('git-conflict').setup()
+    end
+  },
+  {
+    "sindrets/diffview.nvim",
+    event = "BufRead",
+  },
+  {
+    'TimUntersberger/neogit',
+    config = function()
+      require('neogit').setup({
+        integrations = {
+          diffview = true
+        }
+      })
+    end
+  },
+  {
+    'nvim-telescope/telescope-live-grep-raw.nvim',
+    config = function()
+      lvim.builtin.which_key.mappings["st"] = {
+        "<cmd>lua require('telescope').extensions.live_grep_raw.live_grep_raw()<CR>", "Search Raw"
+      }
+    end
+  }
 }
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)

@@ -11,3 +11,6 @@ function! s:markdownPreviewConfig()
     command! MarkdownPreviewS call s:Close_browser()
 endfunction
 call s:markdownPreviewConfig()
+
+nnoremap <leader>S 
+
